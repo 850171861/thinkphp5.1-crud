@@ -1,0 +1,65 @@
+{extend name="layout" /}
+
+
+{block name="content"}
+<button class="layui-btn layui-btn-normal create">添加</button>
+
+<table class="layui-hide" id="test" lay-filter="test"></table>
+
+<script type="text/html" id="barDemo">
+ <!-- 操作按钮 -->
+<a class="layui-btn layui-btn-success" lay-event="edit">编辑</a>
+<a class="layui-btn layui-btn-danger" lay-event="del">删除</a>
+</script>
+
+<script>
+    layui.use(['table', 'jquery'], function () {
+        var table = layui.table;
+        var $ = layui.jquery;
+        table.render({
+            elem: '#test'
+            , id: 'testReload'
+            , page: true   //开启分页
+            , height: 500
+            , url: "{:url('api')}"
+            , cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+            , cols: [[
+                { field: 'Id', title: 'ID', sort: true }
+                , { field: 'username', title: '用户名' }
+                , { field: 'sex', title: '性别', sort: true }
+                , { field: '', title: '操作', toolbar: '#barDemo' }
+            ]]
+        });
+        //添加
+        $('.create').click(function () {
+            layer.open({
+                type: 2,
+                area: ['700px', '450px'],
+                content: "{:url('create')}"
+            });
+        })
+
+        table.on('tool(test)', function (obj) {
+            if (obj.event === 'edit') {
+                layer.open({
+                    type: 2,
+                    area: ['700px', '450px'],
+                    content: "{:url('edit')}" + "?id=" + obj.data.Id
+                })
+            } else if (obj.event === 'del') {
+                var id = obj.data.Id;
+                var url = "{:url('delete')}";
+                $.get(url, { id: id }, function (res) {
+                    if (res.code === 1) {
+                        layer.msg(res.msg)
+                        table.reload('testReload')
+                    }
+                })
+
+            }
+        })
+
+    });
+</script>
+
+{/block}
